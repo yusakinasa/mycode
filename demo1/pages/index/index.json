@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+
+  },
+  "navigationBarBackgroundColor": "#000000",
+  "navigationBarTitleText":"登录页面",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle":"light"
+  
+
+}
