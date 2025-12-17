@@ -3,7 +3,7 @@
 
   },
   "navigationBarBackgroundColor": "#000000",
-  "navigationBarTitleText":"登录页面",
+  "navigationBarTitleText":"所有计划",
   "enablePullDownRefresh": true,
   "backgroundTextStyle":"light"
   

@@ -1,0 +1,51 @@
+<!--pages/new/new.wxml-->
+<text>pages/new/new.wxml</text>
+
+<van-cell-group>
+  <van-field
+    data-field="plan_name"
+    value="{{form.plan_name}}"
+    placeholder="请输入计划名称"
+    bind:change="onFieldChange"
+  />
+
+  <view>请输入开始时间</view>
+
+  <!-- <van-field
+    data-field="start_time"
+    value="{{form.start_time}}"
+    type="password"
+    placeholder="请输入开始时间"
+    bind:change="onFieldChange"
+  /> -->
+
+  <!-- <van-field
+    data-field="end_time"
+    value="{{form.end_time}}"
+    placeholder="请输入结束时间"
+    bind:change="onFieldChange"
+  /> -->
+  <van-datetime-picker
+  type="time"
+  data-field="start_time"
+  value="{{ form.start_time }}"
+  min-hour="{{ minHour }}"
+  max-hour="{{ maxHour }}"
+  bind:input="onFieldChange"
+/>
+
+<view>请输入结束时间</view>
+<van-datetime-picker
+  type="time"
+  data-field="end_time"
+  value="{{ form.end_time }}"
+  min-hour="{{ minHour }}"
+  max-hour="{{ maxHour }}"
+  bind:input="onFieldChange"
+/>
+</van-cell-group>
+
+
+
+
+<van-button type="default" bind:tap="updatePlan">提交</van-button>

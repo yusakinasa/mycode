@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+
+  },
+  "navigationBarBackgroundColor": "#000000",
+  "navigationBarTitleText":"展示广场",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle":"light"
+  
+
+}

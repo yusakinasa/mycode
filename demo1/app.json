@@ -1,7 +1,11 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/my/my"
+    "pages/ground/ground",
+    "pages/new/new",
+    "pages/edit/edit",
+    "pages/my/my",
+    "pages/login/login"
     
   ],
   "window": {
@@ -17,12 +21,12 @@
       "position": "bottom",
       "list":[
       {"pagePath":"pages/index/index",
-        "text":"首页",
+        "text":"计划",
       "iconPath": "images/home.png",
       "selectedIconPath":"images/home_select.png"
       },
-      {"pagePath":"pages/my/my",
-        "text":"我的",
+      {"pagePath":"pages/ground/ground",
+        "text":"广场",
       "iconPath": "images/my.png",
       "selectedIconPath":"images/my_select.png"
       }
@@ -34,6 +38,9 @@
   "usingComponents": {
     "van-cell": "@vant/weapp/cell/index",
     "van-cell-group": "@vant/weapp/cell-group/index",
-    "van-button": "@vant/weapp/button/index"
+    "van-button": "@vant/weapp/button/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-datetime-picker": "@vant/weapp/datetime-picker/index",
+    "van-dialog": "@vant/weapp/dialog/index"
   }
 }

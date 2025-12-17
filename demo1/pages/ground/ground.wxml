@@ -1,0 +1,27 @@
+<!--index.wxml-->
+
+<view class="record">
+    <view wx:for="{{record}}"  wx:key="index"> 
+    <view class="record-item">
+    <text class='user-name'>{{item.user_name}}</text>
+    <text class='finish-time'>{{item.end}}</text>
+    <text>完成了</text>
+    <text class='plan-name'>{{item.plan_name}}</text>
+    <text>持续时间：</text>
+    <text class='duration'>{{item.duration}}</text>
+    </view>
+    </view>
+   
+
+  
+    
+    
+  </view>
+
+  
+
+ 
+
+
+
+

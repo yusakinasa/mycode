@@ -8,17 +8,19 @@
     <text class='plan-starttime'>{{item.start_time}}</text>
     <text>至</text>
     <text class='plan-endtime'>{{item.end_time}}</text>
-    <van-button plain type="primary" class='plan-state'>{{item.state_text}}</van-button>
-    <van-button type="default">修改</van-button>
+    <van-button plain type="primary" class='plan-state' bind:tap="changePlanState" data-index="{{index}}">{{item.state_text}}</van-button>
+    <van-button type="default" bind:tap="editPlan" data-index="{{index}}">修改</van-button>
     <van-button type="danger" bind:tap="planItemDelete" data-index="{{index}}">删除</van-button>
     </view>
     </view>
    
 
-    <van-button type="info">添加</van-button>
+    <van-button type="info" bind:tap="AddPlan">添加</van-button>
     
     
   </view>
+
+  <van-dialog id="van-dialog" />
 
   
 

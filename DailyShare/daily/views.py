@@ -33,6 +33,9 @@ def fixed_plan(request):
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            print(serializer.errors)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE','PATCH'])
 def plan_detail(request, plan_id):
@@ -63,3 +66,32 @@ def plan_detail(request, plan_id):
             serializer.save()
             return JsonResponse({'code': 100, 'msg': 'success', 'result': serializer.data})
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET','POST'])
+def record(request):
+    if request.method == 'GET':
+        records = Record.objects.select_related('user_id').all().filter(upload=True)
+        serializer = RecordSerializer(records, many=True)
+        return JsonResponse({'code': 100, 'msg': "success", 'result': serializer.data})
+    if request.method == 'POST':
+        serializers = RecordAddSerializer(data=request.data)
+        if serializers.is_valid():
+            record_instance = serializers.save()
+
+            # 用完整字段的 Serializer 再序列化一次
+            full_serializer = RecordSerializer(record_instance)  # 这里用完整字段的 Serializer
+            return JsonResponse({'code': 100, 'msg': 'success', 'result': full_serializer.data},
+                                status=status.HTTP_201_CREATED)
+
+@api_view(['PUT'])
+def record_detail(request, record_id):
+    try:
+        record = Record.objects.get(pk=record_id)
+    except Record.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    serializers = RecordActivateSerializer(record, data=request.data)
+    if serializers.is_valid():
+        serializers.save()
+        return JsonResponse(serializers.data, status=status.HTTP_200_OK)
+    return JsonResponse(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+

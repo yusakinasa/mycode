@@ -24,10 +24,23 @@ class Plan(models.Model):
     plan_name = models.CharField(max_length=100)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    start = models.TimeField(default=datetime.datetime.now())
-    end = models.TimeField(default=datetime.datetime.now())#yiyibaobao
+    # start = models.TimeField(default=datetime.datetime.now())
+    # end = models.TimeField(default=datetime.datetime.now())#yiyibaobao
     state = models.BooleanField(default=False)
     is_fixed = models.BooleanField()
+
+class Record(models.Model):
+    record_id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(User,on_delete=models.CASCADE)
+    plan_name =models.CharField(max_length=100)
+    start = models.DateTimeField()
+    end = models.DateTimeField(default=datetime.datetime.now)
+    upload = models.BooleanField(default=False)
+
+    @property
+    def duration(self):
+        return self.end - self.start
+
 
 
 
