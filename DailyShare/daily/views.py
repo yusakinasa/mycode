@@ -1,4 +1,5 @@
 import hashlib
+from functools import wraps
 
 from django.contrib import auth
 from django.contrib.auth.models import User
@@ -18,6 +19,31 @@ from rest_framework.decorators import api_view
 
 from .serializer import *
 
+def token_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        token = request.META.get('HTTP_TOKEN')
+        if not token:
+            return JsonResponse({'code': 401, 'msg': '未携带token'})
+
+        profile = UserProfile.objects.filter(token=token).first()
+        if not profile:
+            return JsonResponse({'code': 401, 'msg': '无效token'})
+
+        request.user = profile.user
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
+
+class TokenRequiredMixin(View):
+    def dispatch(self, request, *args, **kwargs):
+        token = request.META.get('HTTP_TOKEN')
+        profile = UserProfile.objects.filter(token=token).first()
+        if not profile:
+            return JsonResponse({'code': 400, 'msg': '无效token'})
+        else:
+            request.user = profile.user
+            return super(TokenRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 # def fixed_plan(request):
 #     plans = Plan.objects.all().values(
@@ -31,6 +57,7 @@ from .serializer import *
 
 
 @api_view(['GET', 'POST'])
+@token_required
 def fixed_plan(request):
     if request.method == 'GET':
         plans = Plan.objects.filter(is_fixed=True)
@@ -105,7 +132,9 @@ def record_detail(request, record_id):
 
 
 ###########################   token  ###############
-class UserView(View):
+
+
+class UserView(TokenRequiredMixin,View):
 
     def get(self, request):
         users = User.objects.all()
@@ -145,11 +174,3 @@ class LoginView(View):
     def generate_token(self,username):
         return hashlib.md5(username.encode('utf-8')).hexdigest()
 
-class TokenRequiredMixin(View):
-    def dispatch(self, request, *args, **kwargs):
-        token = request.META.get('HTTP_AUTH')
-        user = User.objects.filter(token=token).first()
-        if not user:
-            return JsonResponse({'code':400,'msg':"无效token"})
-        else:
-            return super(TokenRequiredMixin, self).dispatch(request, *args, **kwargs)
