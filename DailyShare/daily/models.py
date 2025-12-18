@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 
+
 # Create your models here.
 
 
@@ -14,13 +15,21 @@ class Welcome(models.Model):
     is_delete = models.BooleanField(default=False)
 
 
+#
+# class User(models.Model):
+#     user_id = models.AutoField(primary_key=True)
+#     usr_name = models.CharField(max_length=100)
 
-class User(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    usr_name = models.CharField(max_length=100)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    token = models.CharField(max_length=50)
+    phone = models.CharField(max_length=50)
+
 class Plan(models.Model):
     plan_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User,on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,default='')
     plan_name = models.CharField(max_length=100)
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -31,7 +40,7 @@ class Plan(models.Model):
 
 class Record(models.Model):
     record_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User,on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,default='')
     plan_name =models.CharField(max_length=100)
     start = models.DateTimeField()
     end = models.DateTimeField(default=datetime.datetime.now)

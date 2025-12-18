@@ -1,9 +1,17 @@
+import hashlib
+
+from django.contrib import auth
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
+import json
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 
 # Create your views here.
-from .models import Plan, Welcome
+from .models import Plan, Welcome, UserProfile
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -95,3 +103,53 @@ def record_detail(request, record_id):
         return JsonResponse(serializers.data, status=status.HTTP_200_OK)
     return JsonResponse(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+###########################   token  ###############
+class UserView(View):
+
+    def get(self, request):
+        users = User.objects.all()
+        res_list =[]
+        for user in users:
+            res_list.append({
+                "username": user.username,
+                "phone": user.userprofile.phone,
+            })
+        return JsonResponse({'code':100,'msg':"success","content":res_list})
+
+
+class LoginView(View):
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
+    def post(self, request):
+        pay_load = json.loads(request.body)
+        username = pay_load.get('username')
+        password = pay_load.get('password')
+
+        user = auth.authenticate(username=username, password=password)
+        if not user:
+            return JsonResponse({'code':400,'msg':"不存在该用户"})
+        else:
+            # generate token
+            token = self.generate_token(username)
+            user.userprofile.token = token
+            user.userprofile.save()
+            user.save()
+
+            return JsonResponse({'code':100,'msg':"success","token":token})
+
+    def generate_token(self,username):
+        return hashlib.md5(username.encode('utf-8')).hexdigest()
+
+class TokenRequiredMixin(View):
+    def dispatch(self, request, *args, **kwargs):
+        token = request.META.get('HTTP_AUTH')
+        user = User.objects.filter(token=token).first()
+        if not user:
+            return JsonResponse({'code':400,'msg':"无效token"})
+        else:
+            return super(TokenRequiredMixin, self).dispatch(request, *args, **kwargs)

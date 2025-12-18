@@ -8,4 +8,6 @@ urlpatterns = [
     path('plan/<int:plan_id>',plan_detail),
     path('records/',record),
     path('record/<int:record_id>',record_detail),
+    path('users/',UserView.as_view()),
+    path('get_token/',LoginView.as_view()),
 ]
