@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 
 # Create your views here.
-from .models import Plan, Welcome, UserProfile
+from .models import Plan,  UserProfile
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -31,6 +31,7 @@ def token_required(view_func):
             return JsonResponse({'code': 401, 'msg': '无效token'})
 
         request.user = profile.user
+        request.profile = profile
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
@@ -45,28 +46,18 @@ class TokenRequiredMixin(View):
             request.user = profile.user
             return super(TokenRequiredMixin, self).dispatch(request, *args, **kwargs)
 
-# def fixed_plan(request):
-#     plans = Plan.objects.all().values(
-#         'plan_name',
-#         'start_time',
-#         'end_time',
-#         'state',
-#         'is_fixed'
-#     )
-#     return JsonResponse({'code':100,'msg':"success",'result':list(plans)})
-
 
 @api_view(['GET', 'POST'])
 @token_required
 def fixed_plan(request):
     if request.method == 'GET':
-        plans = Plan.objects.filter(is_fixed=True)
+        plans = Plan.objects.filter(is_fixed=True,user=request.profile )
         serializer = PlanGetSerializer(plans, many=True)
         return JsonResponse({'code':100,'msg':"success",'result':serializer.data})
     if request.method == 'POST':
         serializer = PlanAddSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.profile)
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
@@ -102,21 +93,25 @@ def plan_detail(request, plan_id):
             return JsonResponse({'code': 100, 'msg': 'success', 'result': serializer.data})
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET','POST'])
+@api_view(['GET'])
 def record(request):
-    if request.method == 'GET':
-        records = Record.objects.select_related('user_id').all().filter(upload=True)
-        serializer = RecordSerializer(records, many=True)
-        return JsonResponse({'code': 100, 'msg': "success", 'result': serializer.data})
-    if request.method == 'POST':
-        serializers = RecordAddSerializer(data=request.data)
-        if serializers.is_valid():
-            record_instance = serializers.save()
+    records = Record.objects.select_related('user', 'user__user').filter(upload=True)
+    serializer = RecordSerializer(records, many=True)
+    return JsonResponse({'code': 100, 'msg': "success", 'result': serializer.data})
 
-            # 用完整字段的 Serializer 再序列化一次
-            full_serializer = RecordSerializer(record_instance)  # 这里用完整字段的 Serializer
-            return JsonResponse({'code': 100, 'msg': 'success', 'result': full_serializer.data},
-                                status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@token_required
+def record_add(request):
+    serializers = RecordAddSerializer(data=request.data)
+    if serializers.is_valid():
+        record_instance = serializers.save(user=request.profile)
+
+        # 用完整字段的 Serializer 再序列化一次
+        full_serializer = RecordSerializer(record_instance)  # 这里用完整字段的 Serializer
+        return JsonResponse({'code': 100, 'msg': 'success', 'result': full_serializer.data},
+                            status=status.HTTP_201_CREATED)
 
 @api_view(['PUT'])
 def record_detail(request, record_id):
@@ -129,6 +124,25 @@ def record_detail(request, record_id):
         serializers.save()
         return JsonResponse(serializers.data, status=status.HTTP_200_OK)
     return JsonResponse(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_username_by_token(request):
+    # 从 header 获取 token
+    token = request.META.get('HTTP_TOKEN')  # header 中 'Token: xxx' → HTTP_TOKEN
+    if not token:
+        return JsonResponse({'code': 400, 'msg': '缺少 token'})
+
+    # 查找对应 UserProfile
+    profile = UserProfile.objects.filter(token=token).first()
+    if not profile:
+        return JsonResponse({'code': 401, 'msg': '无效 token'})
+
+    # 返回 username
+    username = profile.user.username
+    return JsonResponse({'code': 100, 'msg': 'success', 'username': username})
+
+
 
 
 ###########################   token  ###############
@@ -147,6 +161,9 @@ class UserView(TokenRequiredMixin,View):
         return JsonResponse({'code':100,'msg':"success","content":res_list})
 
 
+
+
+
 class LoginView(View):
 
     @method_decorator(csrf_exempt)
@@ -160,17 +177,55 @@ class LoginView(View):
         password = pay_load.get('password')
 
         user = auth.authenticate(username=username, password=password)
-        if not user:
-            return JsonResponse({'code':400,'msg':"不存在该用户"})
-        else:
-            # generate token
-            token = self.generate_token(username)
-            user.userprofile.token = token
-            user.userprofile.save()
-            user.save()
 
-            return JsonResponse({'code':100,'msg':"success","token":token})
+        if not user:
+            return JsonResponse({'code': 400, 'msg': "不存在该用户"})
+
+
+        # ✅ 关键：确保 UserProfile 一定存在
+        profile,_= UserProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                'phone': '1'
+            }
+        )
+
+        if not profile.token:
+            profile.token = self.generate_token(username)
+            profile.save()
+
+        return JsonResponse({
+            'code': 100,
+            'msg': "success",
+            'token': profile.token,
+        })
 
     def generate_token(self,username):
         return hashlib.md5(username.encode('utf-8')).hexdigest()
+
+
+
+#  创建用户接口
+@api_view(['POST'])
+def create_user(request):
+    serializer = UserCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        return JsonResponse({
+            "code": 100,
+            "msg": "用户创建成功",
+            "result": {
+                "user_id": user.id,
+                "username": user.username,
+                "email": user.email
+            }
+        })
+    return JsonResponse({
+        "code": 400,
+        "msg": "参数错误",
+        "errors": serializer.errors
+    }, status=400)
+
+
+
 

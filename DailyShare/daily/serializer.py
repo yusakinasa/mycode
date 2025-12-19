@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from daily.models import Plan, Record
@@ -9,7 +10,7 @@ class PlanGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Plan
-        fields = ['plan_name', 'start_time', 'end_time','state_text','state']
+        fields = ['plan_name', 'start_time', 'end_time','state_text','state','plan_id']
 
     def get_state_text(self, obj):
         return '进行中' if obj.state else '未开始'
@@ -36,7 +37,10 @@ class PlanPartialUpdateSerializer(serializers.ModelSerializer):
 
 class RecordSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField()  # 如果你用 @property 计算 duration
-    user_name = serializers.CharField(source='user_id.usr_name', read_only=True)
+    user_name = serializers.CharField(
+        source='user.user.username',
+        read_only=True
+    )
 
     class Meta:
         model = Record
@@ -61,4 +65,24 @@ class RecordActivateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Record
         fields = ['end', 'upload']
+
+
+class UserCreateSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(required=False, allow_blank=True)
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("用户名已存在")
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            email=validated_data.get('email', '')
+        )
+        return user
+
 

@@ -29,6 +29,14 @@ Page({
     })
   },
 
+  onPullDownRefresh() {
+    // 1. 重新请求数据
+    this.loadRecordList()
+
+    // 2. 请求完成后，手动停止刷新
+    wx.stopPullDownRefresh();
+  },
+
   /**
    * 生命周期函数--监听页面加载
    */

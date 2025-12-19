@@ -1,18 +1,31 @@
 // pages/my/my.js
+import { request } from '../../utils/request'
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-
+      username:'',
+  },
+  logout() {
+    wx.clearStorageSync()
+    wx.redirectTo({ url: '/pages/login/login' })
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-
+    request({
+      url: 'http://127.0.0.1:8000/daily/get_username/',
+      method: 'GET',
+      success:(res)=>{
+        this.setData({
+          username:res.data.username
+        })
+      }
+    });
   },
 
   /**

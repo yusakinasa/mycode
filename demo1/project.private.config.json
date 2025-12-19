@@ -10,7 +10,7 @@
       "list": [
         {
           "name": "pages/new/new",
-          "pathName": "pages/new/new",
+          "pathName": "pages/login/login",
           "query": "",
           "launchMode": "default",
           "scene": null

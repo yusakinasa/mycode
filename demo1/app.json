@@ -5,7 +5,8 @@
     "pages/new/new",
     "pages/edit/edit",
     "pages/my/my",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/register/register"
     
   ],
   "window": {
@@ -29,6 +30,11 @@
         "text":"广场",
       "iconPath": "images/my.png",
       "selectedIconPath":"images/my_select.png"
+      },
+      {"pagePath":"pages/my/my",
+        "text":"我的",
+      "iconPath": "images/home.png",
+      "selectedIconPath":"images/home_select.png"
       }
 
     ]

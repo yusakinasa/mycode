@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import Dialog from '@vant/weapp/dialog/dialog';
+import { request } from '../../utils/request'
 // index.js
 Page({
   data:{
@@ -7,7 +8,9 @@ Page({
     record_id:''
   },
   editPlan(e){
-    const plan_id =e.currentTarget.dataset.index+1; 
+    const index = e.currentTarget.dataset.index;
+    const planItem = this.data.plan[index];
+    const plan_id =planItem.plan_id
     wx.navigateTo({
       url: `/pages/edit/edit?plan_id=${plan_id}`
     });
@@ -15,6 +18,8 @@ Page({
 
     onLoad(options){
       //向后端发送请求
+      // const token = wx.getStorageSync('token')
+      // console.log("token is "+ token)
      this.loadPlanList()
     },
     //检查此时state==true的个数
@@ -25,9 +30,14 @@ Page({
     },
     
 loadPlanList(){
-  wx.request({
+  // const token = wx.getStorageSync('token')
+  // console.log(token)
+  request({
     url: 'http://127.0.0.1:8000/daily/fplan/',
     method:'GET',
+    // header:{
+    //   token :token
+    // },
     success:(res)=>{
       if(res.data.code==100){
         this.setData({
@@ -46,7 +56,9 @@ loadPlanList(){
   })
 },
     planItemDelete(e){
-      const plan_id =e.currentTarget.dataset.index+1; 
+      const index = e.currentTarget.dataset.index;
+      const planItem = this.data.plan[index];
+      const plan_id =planItem.plan_id
       // console.log('http://127.0.0.1:8000/daily/plan/'+plan_id,)
       wx.request({
         url: 'http://127.0.0.1:8000/daily/plan/'+plan_id,
@@ -59,29 +71,28 @@ loadPlanList(){
     changePlanState(e){
       const index = e.currentTarget.dataset.index;
       const planItem = this.data.plan[index];
-      // const now = new Date();
-      // // console.log(now)
-      // const isoString = now.toISOString().split('.')[0]; // 去掉毫秒
       const isoString = dayjs().format('YYYY-MM-DDTHH:mm:ss');
-      // console.log(isoString); 
-// 示例输出: "2025-12-17T17:04:00"
 
       if(!planItem.state){
-       if(!this.countStateTrue(this.data.plan)){ wx.request({
-          url:'http://127.0.0.1:8000/daily/plan/'+(index+1),
+       if(!this.countStateTrue(this.data.plan)){ 
+         wx.request({
+          url:'http://127.0.0.1:8000/daily/plan/'+planItem.plan_id,
           method:"PATCH",
           data:{"state":!planItem.state},
           success:()=>{
-            this.loadPlanList()
+            this.loadPlanList();
+            // this.setData({
+            //   [`plan[${index}].state_text`]: this.data.plan[index].state_text + "从"+isoString+"开始"
+            // });
+            
           }
 
         });
-        wx.request({
-          url: 'http://127.0.0.1:8000/daily/records/',
+        request({
+          url: 'http://127.0.0.1:8000/daily/record_add/',
           method:'POST',
           data:{
             "plan_name":planItem.plan_name,
-            "user_id":1,
             "start":isoString
           },
           success:(res)=>{
@@ -90,7 +101,9 @@ loadPlanList(){
               })
               // console.log(this.data.record_id)
           }
-        })
+        });
+
+
 }else{
   // console.log("oops!")
   Dialog.alert({
@@ -104,7 +117,7 @@ loadPlanList(){
       }
       else{
         wx.request({
-          url:'http://127.0.0.1:8000/daily/plan/'+(index+1),
+          url:'http://127.0.0.1:8000/daily/plan/'+planItem.plan_id,
           method:"PATCH",
           data:{"state":!planItem.state},
           success:()=>{
@@ -137,6 +150,15 @@ loadPlanList(){
       // 2. 请求完成后，手动停止刷新
       wx.stopPullDownRefresh();
     },
+    onShow() {
+      if (!wx.getStorageSync('token')) {
+        wx.redirectTo({ url: '/pages/login/login' })
+      }
+      this.loadPlanList()
+    },
+    
+    
+    
 
 
 

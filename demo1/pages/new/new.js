@@ -1,4 +1,6 @@
 // pages/new/new.js
+import { request } from '../../utils/request'
+
 Page({
 data:{
   /**
@@ -27,11 +29,11 @@ data:{
     const payload = {
       ...this.data.form,
       "is_fixed":true,
-      "user_id":1
+      
     };
 
     console.log('最终提交的 JSON：', payload);
-    wx.request({
+    request({
       url: 'http://127.0.0.1:8000/daily/fplan/',
       method:"POST",
       data:payload,

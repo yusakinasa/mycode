@@ -1,2 +1,6 @@
 <!--pages/my/my.wxml-->
 <text>pages/my/my.wxml</text>
+
+
+<view>用户名：{{username}}</view>
+<button type="warn" bind:tap="logout">退出登录</button>
