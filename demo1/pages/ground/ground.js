@@ -10,7 +10,7 @@ Page({
   },
   loadRecordList(){
     wx.request({
-      url: 'http://127.0.0.1:8000/daily/records/',
+      url: 'https://dailyshare.onrender.com/daily/records/',
       method:'GET',
       success:(res)=>{
         if(res.data.code==100){
@@ -32,9 +32,11 @@ Page({
   onPullDownRefresh() {
     // 1. 重新请求数据
     this.loadRecordList()
+    
 
     // 2. 请求完成后，手动停止刷新
     wx.stopPullDownRefresh();
+    
   },
 
   /**
@@ -72,12 +74,7 @@ Page({
 
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
+  
 
   /**
    * 页面上拉触底事件的处理函数

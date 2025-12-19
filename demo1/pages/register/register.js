@@ -25,7 +25,7 @@ Page({
 
     console.log('最终提交的 JSON：', payload);
     wx.request({
-      url: 'http://127.0.0.1:8000/daily/auth/user/create/',
+      url: 'https://dailyshare.onrender.com/daily/auth/user/create/',
       method:"POST",
       data:payload,
       success:(res)=>{

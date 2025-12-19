@@ -35,7 +35,7 @@ Page({
   
       // console.log('最终提交的 JSON：', payload);
       wx.request({
-        url: 'http://127.0.0.1:8000/daily/plan/'+this.data.plan_id,
+        url: 'https://dailyshare.onrender.com/daily/plan/'+this.data.plan_id,
         method:"PUT",
         data:payload,
         success:()=>{
@@ -56,7 +56,7 @@ Page({
 
     loadPlanDetail(plan_id) {
       wx.request({
-        url: `http://127.0.0.1:8000/daily/plan/${plan_id}`,
+        url: `https://dailyshare.onrender.com/daily/plan/${plan_id}`,
         method: 'GET',
         success: (res) => {
           if (res.data.code === 100) {

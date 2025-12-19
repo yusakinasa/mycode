@@ -12,13 +12,14 @@ Page({
     wx.clearStorageSync()
     wx.redirectTo({ url: '/pages/login/login' })
   },
+  
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
     request({
-      url: 'http://127.0.0.1:8000/daily/get_username/',
+      url: 'https://dailyshare.onrender.com/daily/get_username/',
       method: 'GET',
       success:(res)=>{
         this.setData({
@@ -59,10 +60,7 @@ Page({
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
-  onPullDownRefresh() {
-
-  },
-
+  
   /**
    * 页面上拉触底事件的处理函数
    */

@@ -33,7 +33,7 @@ loadPlanList(){
   // const token = wx.getStorageSync('token')
   // console.log(token)
   request({
-    url: 'http://127.0.0.1:8000/daily/fplan/',
+    url: 'https://dailyshare.onrender.com/daily/fplan/',
     method:'GET',
     // header:{
     //   token :token
@@ -59,9 +59,9 @@ loadPlanList(){
       const index = e.currentTarget.dataset.index;
       const planItem = this.data.plan[index];
       const plan_id =planItem.plan_id
-      // console.log('http://127.0.0.1:8000/daily/plan/'+plan_id,)
+    
       wx.request({
-        url: 'http://127.0.0.1:8000/daily/plan/'+plan_id,
+        url: 'https://dailyshare.onrender.com/daily/plan/'+plan_id,
         method:"DELETE",
         success:()=>{
           this.loadPlanList()
@@ -76,7 +76,7 @@ loadPlanList(){
       if(!planItem.state){
        if(!this.countStateTrue(this.data.plan)){ 
          wx.request({
-          url:'http://127.0.0.1:8000/daily/plan/'+planItem.plan_id,
+          url:'https://dailyshare.onrender.com/daily/plan/'+planItem.plan_id,
           method:"PATCH",
           data:{"state":!planItem.state},
           success:()=>{
@@ -89,7 +89,7 @@ loadPlanList(){
 
         });
         request({
-          url: 'http://127.0.0.1:8000/daily/record_add/',
+          url: 'https://dailyshare.onrender.com/daily/record_add/',
           method:'POST',
           data:{
             "plan_name":planItem.plan_name,
@@ -117,7 +117,7 @@ loadPlanList(){
       }
       else{
         wx.request({
-          url:'http://127.0.0.1:8000/daily/plan/'+planItem.plan_id,
+          url:'https://dailyshare.onrender.com/daily/plan/'+planItem.plan_id,
           method:"PATCH",
           data:{"state":!planItem.state},
           success:()=>{
@@ -126,7 +126,7 @@ loadPlanList(){
 
         }),
         wx.request({
-          url: 'http://127.0.0.1:8000/daily/record/'+this.data.record_id,
+          url: 'https://dailyshare.onrender.com/daily/record/'+this.data.record_id,
           method:'PUT',
           data:{
             "upload":true,
@@ -146,9 +146,11 @@ loadPlanList(){
     onPullDownRefresh() {
       // 1. 重新请求数据
       this.loadPlanList()
+      console.log("1")
   
       // 2. 请求完成后，手动停止刷新
       wx.stopPullDownRefresh();
+      console.log("2")
     },
     onShow() {
       if (!wx.getStorageSync('token')) {

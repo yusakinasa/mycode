@@ -34,7 +34,7 @@ data:{
 
     console.log('最终提交的 JSON：', payload);
     request({
-      url: 'http://127.0.0.1:8000/daily/fplan/',
+      url: 'https://dailyshare.onrender.com/daily/fplan/',
       method:"POST",
       data:payload,
       success:()=>{
